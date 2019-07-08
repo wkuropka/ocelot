@@ -121,6 +121,7 @@ def create_r_matrix(element):
             :param f: frequency
             :param E: initial energy
             :return: matrix
+            Standing wave cavity including a default coupler kick; according to DOI:10.1103/PhysRevE.49.1599
             """
             phi = phi * np.pi / 180.
             de = V * np.cos(phi)
@@ -146,6 +147,110 @@ def create_r_matrix(element):
             r21 = -Ep / Ef * (cos_phi / np.sqrt(2. * eta) + np.sqrt(eta / 8.) / cos_phi) * sin_alpha
 
             r22 = Ei / Ef * (cos_alpha + np.sqrt(2. / eta) * cos_phi * sin_alpha)
+
+            r56 = 0.
+            beta0 = 1
+            beta1 = 1
+
+            k = 2. * np.pi * freq / speed_of_light
+            r55_cor = 0.
+            if V != 0 and E != 0:
+                gamma2 = Ei * Ei
+                beta0 = np.sqrt(1. - 1 / gamma2)
+                gamma2 = Ef * Ef
+                beta1 = np.sqrt(1. - 1 / gamma2)
+
+                #r56 = (beta0 / beta1 - 1) * Ei / (Ef - Ei) * z
+                r56 = - z/(Ef * Ef * Ei * beta1) * (Ef + Ei)/(beta1 + beta0)
+                g0 = Ei
+                g1 = Ef
+                r55_cor = k * z * beta0 * V / m_e_GeV * np.sin(phi) * (g0 * g1 * (beta0 * beta1 - 1) + 1) / (
+                            beta1 * g1 * (g0 - g1) ** 2)
+
+
+            r66 = Ei/Ef*beta0/beta1
+            r65 = k*np.sin(phi)*V/(Ef*beta1*m_e_GeV)
+            cav_matrix = np.array([[r11, r12, 0., 0., 0., 0.],
+                                [r21, r22, 0., 0., 0., 0.],
+                                [0., 0., r11, r12, 0., 0.],
+                                [0., 0., r21, r22, 0., 0.],
+                                [0., 0., 0., 0., 1. + r55_cor, r56],
+                                [0., 0., 0., 0., r65, r66]]).real
+            if element.coupler_kick:
+                #element.vxx_up = 1.0003 - 0.8132j
+                #element.vxy_up = (3.4075 - 0.41223j)
+                m21 = (element.vxx_up * V * np.exp(1j*phi)).real*1e-3 /E
+                m43 = - m21
+                m23 = (element.vxy_up* V * np.exp(1j*phi)).real*1e-3 /E
+
+                coupl_kick_up = np.array([[1, 0., 0., 0., 0., 0.],
+                                      [m21, 1, m23, 0., 0., 0.],
+                                      [0., 0., 1, 0., 0., 0.],
+                                      [m23, 0., m43, 1, 0., 0.],
+                                      [0., 0., 0., 0., 1., 0.],
+                                      [0., 0., 0., 0., 0., 1]]).real
+
+                #vxx = ((-4.9278 - 2.2112j) * V * np.exp(1j*phi)).real*1e-3 /(E + de)
+                #vyy = - vxx
+                #vxy = ((2.9224 - 0.027228j) * V * np.exp(1j*phi)).real *1e-3 /(E + de)
+
+                #element.vxx_down = (-4.9278 - 2.2112j)
+                #element.vxy_down = (2.9224 - 0.027228j)
+                m21 = (element.vxx_down * V * np.exp(1j*phi)).real*1e-3 /(E + de)
+                m43 = - m21
+                m23 = (element.vxy_down* V * np.exp(1j*phi)).real*1e-3 /(E + de)
+                coupl_kick_down = np.array([[1, 0., 0., 0., 0., 0.],
+                                      [m21, 1, m23, 0., 0., 0.],
+                                      [0., 0., 1, 0., 0., 0.],
+                                      [m23, 0., m43, 1, 0., 0.],
+                                      [0., 0., 0., 0., 1., 0.],
+                                      [0., 0., 0., 0., 0., 1]]).real
+                return np.dot(np.dot(coupl_kick_down, cav_matrix), coupl_kick_up)
+            return cav_matrix
+
+        if element.v == 0.:
+            r_z_e = lambda z, energy: uni_matrix(z, 0., hx=0., sum_tilts=element.dtilt + element.tilt, energy=energy)
+        else:
+            r_z_e = lambda z, energy: cavity_R_z(z, V=element.v * z / element.l, E=energy, freq=element.freq,
+                                               phi=element.phi)
+    
+    elif element.__class__ == TWCavity:
+
+        def cavity_R_z(z, V, E, freq, phi=0.):
+            """
+            :param z: length
+            :param de: delta E
+            :param f: frequency
+            :param E: initial energy
+            :return: matrix
+            """
+            phi = phi * np.pi / 180.
+            de = V * np.cos(phi)
+            # Sum of spatial harmonic fourier coefficients
+            eta = 0
+            for b in element.B_n:
+                eta += b[0]**2 + b[1]**2 + 2*b[0]*b[1] * np.cos(2*phi)
+            
+            # gamma = (E + 0.5 * de) / m_e_GeV
+            Ei = E / m_e_GeV
+            Ef = (E + de) / m_e_GeV
+            Ep = (Ef - Ei) / z  # energy derivative
+            if Ei == 0:
+                logger.warning("cavity: Warning! Initial energy is zero and cavity.v != 0!n\ Change Ei (ParticleArray.E or Twiss.E) or cavity.v must be 0")
+
+            cos_phi = np.cos(phi)
+            alpha = np.sqrt(eta / 8.) / cos_phi * np.log(Ef / Ei)
+            sin_alpha = np.sin(alpha)
+            cos_alpha = np.cos(alpha)
+            r11 = cos_alpha
+
+            if abs(Ep) > 1e-10:
+                r12 = np.sqrt(8. / eta) * Ei / Ep * cos_phi * sin_alpha
+            else:
+                r12 = z
+            r21 = -Ep / Ef * np.sqrt(eta / 8.) / cos_phi * sin_alpha
+
+            r22 = Ei / Ef * cos_alpha
 
             r56 = 0.
             beta0 = 1

@@ -825,7 +825,7 @@ class MethodTM:
             tm = method(s_start=s_start, npoints=npoints)
             tm.mag_field = element.mag_field
 
-        if element.__class__ == Cavity:
+        if element.__class__ in [Cavity,TWCavity]:
             tm = CavityTM(v=element.v, freq=element.freq, phi=element.phi)
             if element.coupler_kick:
                 tm.coupler_kick = element.coupler_kick
