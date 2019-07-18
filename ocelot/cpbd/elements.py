@@ -313,6 +313,26 @@ class Cavity(Element):
         self.volterr = volterr
         self.coupler_kick = False
 
+class TWCavity(Element):
+    """
+    RF cavity
+    v - voltage [GV/m]
+    freq - frequency [Hz]
+    phi - phase in [deg]
+    B_n - Fourier coefficients of the spatial harmonics, given in pairs [[b_1,b_-1],[b_2,b_-2],..., [b_n,b_-n]]
+    pi standing wave is b_-1 = 1, and all other are zero; according to DOI:10.1103/PhysRevE.49.1599
+    """
+    def __init__(self, l=0., v=0., phi=0., freq=0., volterr=0., B_n=[[0,1]], eid=None):
+        Element.__init__(self, eid)
+        self.l = l
+        self.v = v   # in GV
+        self.freq = freq   # Hz
+        self.phi = phi  # in grad
+        self.E = 0
+        self.B_n = B_n
+        self.volterr = volterr
+        self.coupler_kick = False
+
 class TDCavity(Element):
     """
     Transverse deflecting cavity - by default kick in horizontal plane

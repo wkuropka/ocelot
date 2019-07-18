@@ -229,6 +229,7 @@ def print_elements(elements_dict):
     elements_order.append('Vcor')
     elements_order.append('Undulator')
     elements_order.append('Cavity')
+    elements_order.append('TWCavity')
     elements_order.append('TDCavity')
     elements_order.append('Solenoid')
     elements_order.append('Monitor')
@@ -356,7 +357,7 @@ def write_power_supply_id(lattice, lines=[]):
     quads = find_obj_and_create_name(lattice, types=[Quadrupole])
     sexts = find_obj_and_create_name(lattice, types=[Sextupole])
     octs = find_obj_and_create_name(lattice, types=[Octupole])
-    cavs = find_obj_and_create_name(lattice, types=[Cavity])
+    cavs = find_obj_and_create_name(lattice, types=[Cavity,TWCavity])
     bends = find_obj_and_create_name(lattice, types=[Bend, RBend, SBend])
 
     lines.append("\n# power supplies \n")

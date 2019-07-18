@@ -2,7 +2,7 @@
 general ocelot description
 """
 
-__version__ = '18.12.0'
+__version__ = '18.12.0-WK'
 
 
 __all__ = ['Twiss', 'twiss', "Beam", "Particle", "get_current", "get_envelope",  # beam
@@ -13,7 +13,7 @@ __all__ = ['Twiss', 'twiss', "Beam", "Particle", "get_current", "get_envelope", 
            "get_map", "MethodTM", "SecondTM", "KickTM", "CavityTM", "UndulatorTestTM",  # optics
            'Element', 'Multipole', 'Quadrupole', 'RBend', "Matrix", "UnknownElement",  # elements
            'SBend', 'Bend', 'Drift', 'Undulator', 'Hcor',  # elements
-           'Vcor', "Sextupole", "Monitor", "Marker", "Octupole", "Cavity", "Edge",  # elements
+           'Vcor', "Sextupole", "Monitor", "Marker", "Octupole", "Cavity", "TWCavity", "Edge",  # elements
            "Sequence", "Solenoid", "TDCavity", # elements
            "match", "match_tunes",  # match
            "Navigator", "tracking_step", "create_track_list", "track_nturns", "freq_analysis",  # track
@@ -25,7 +25,7 @@ __all__ = ['Twiss', 'twiss', "Beam", "Particle", "get_current", "get_envelope", 
            "write_lattice",  # io
            "CSR", "SpaceCharge", "Wake", "WakeTable", "WakeKick", "BeamTransform", "SmoothBeam",
            "EmptyProc", "PhysProc", "LaserHeater", "LaserModulator", "SpontanRadEffects", "LSC",
-           "MagneticLattice",
+           "MagneticLattice", "CavitySlippage",
            "ocelog"
            ]
 
