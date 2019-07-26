@@ -403,28 +403,3 @@ class CavitySlippage(PhysProc):
         dPhi = dz / speed_of_light * (1 / beta - 1) * 360 * f
         self.cavity.phi -= dPhi
         self.lat.update_transfer_maps()
-
-class CavitySlippage(PhysProc):
-    """
-    This process steps through a speed of light phase velocity cavity
-    and adjusts the cavity phase in each step corresponding to slippage
-    """
-    def __init__(self, cavity, step=1.0):
-        """
-        param cavity: This thing works only on a TWCavity
-		param lat: We need to update the lattica params
-        """
-        PhysProc.__init__(self)
-        self.cavity = cavity
-        self.lat=None
-
-    def prepare(self,lat):
-        self.lat=lat
-        
-    def apply(self,p_array,dz):
-        f = self.cavity.freq
-        gamma = p_array.E / m_e_GeV
-        beta = np.sqrt(1.0 - 1 / gamma**2) 
-        dPhi = dz / speed_of_light * (1 / beta - 1) * 360 * f
-        self.cavity.phi -= dPhi
-        self.lat.update_transfer_maps()
