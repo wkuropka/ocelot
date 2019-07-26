@@ -163,7 +163,7 @@ class LaserHeater(LaserModulator):
         _logger.info("LaserHeater physics process is obsolete. Use 'LaserModulator' instead.")
 
 
-class Apperture(PhysProc):
+class Aperture(PhysProc):
     """
     Method to cut beam in longitudinal direction (for now)
     """
@@ -173,7 +173,7 @@ class Apperture(PhysProc):
         self.zmax = 5
 
     def apply(self, p_array, dz):
-        _logger.debug(" Apperture applied")
+        _logger.debug(" Aperture applied")
         tau = p_array.tau()[:]
         tau0 = np.mean(tau)
         tau = tau - tau0
@@ -182,6 +182,30 @@ class Apperture(PhysProc):
         inds = inds.reshape(inds.shape[0])
         p_array.rparticles = np.delete(p_array.rparticles, inds, 1)
         p_array.q_array = np.delete(p_array.q_array, inds, 0)
+        
+class XYAperture(PhysProc):
+    """
+    physical rectangular transverse aperture with limits in m
+    just kills the particles that are beyond the aperture
+    limits given in [xmin,xmax],...
+    """
+    def __init__(self,xlims, ylims, step=1):
+        PhysProc.__init__(self, step)
+        self.xmin = xlims[0]
+        self.xmax = xlims[1]
+        self.ymin = ylims[0]
+        self.ymax = ylims[1]
+        self.N = 0 #number of particles scrapped
+
+    def apply(self, p_array, dz):
+        _logger.debug(" Aperture applied")
+        x = p_array.x()[:]
+        y = p_array.y()[:]
+        inds = np.argwhere(np.logical_or(np.logical_or(x < self.xmin, x > self.xmax),np.logical_or(y < self.ymin, y > self.ymax)))
+        inds = inds.reshape(inds.shape[0])
+        p_array.rparticles = np.delete(p_array.rparticles, inds, 1)
+        p_array.q_array = np.delete(p_array.q_array, inds, 0)
+        self.N += len(inds)
 
 
 class BeamTransform(PhysProc):
