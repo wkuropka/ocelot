@@ -51,14 +51,15 @@ class EmptyProc(PhysProc):
 
 
 class SaveBeam(PhysProc):
-    def __init__(self, filename):
+    def __init__(self, filename, directory=""):
         PhysProc.__init__(self)
         self.energy = None
         self.filename = filename
+        self.directory = directory
 
     def apply(self, p_array, dz):
         _logger.debug(" SaveBeam applied, dz =", dz)
-        save_particle_array(filename=self.filename, p_array=p_array)
+        save_particle_array(filename= self.directory + "/" + "{:.3f}".format(p_array.s) + self.filename, p_array=p_array)
 
 
 class SmoothBeam(PhysProc):
