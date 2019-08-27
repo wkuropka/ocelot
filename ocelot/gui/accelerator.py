@@ -273,7 +273,7 @@ dict_plot = {Quadrupole: {"scale": 0.7, "color": "r",            "edgecolor": "r
              Sextupole:  {"scale": 0.5, "color": "g",            "edgecolor": "g",          "label": "sext"},
              Octupole:   {"scale": 0.5, "color": "g",            "edgecolor": "g",          "label": "sext"},
              Cavity:     {"scale": 0.7, "color": "orange",       "edgecolor": "lightgreen", "label": "cav"},
-             TWCavity:     {"scale": 0.7, "color": "orange",       "edgecolor": "lightgreen", "label": "cav"},
+             TWCavity:   {"scale": 0.7, "color": "orange",       "edgecolor": "lightgreen", "label": "twcav"},
              Bend:       {"scale": 0.7, "color": "lightskyblue", "edgecolor": "k",          "label": "bend"},
              RBend:      {"scale": 0.7, "color": "lightskyblue", "edgecolor": "k",          "label": "bend"},
              SBend:      {"scale": 0.7, "color": "lightskyblue", "edgecolor": "k",          "label": "bend"},
@@ -384,7 +384,7 @@ def new_plot_elems(fig, ax, lat, s_point=0, nturns=1, y_lim=None, y_scale=1, leg
         elif elem.__class__ in [Cavity,TWCavity]:
             ampl = 1 # elem.v/rf_max if rf_max != 0 else 0.5
             point, = ax.fill(s_coord, np.array([-1, 1, 1, -1, -1])*ampl*scale*y_scale, color,
-                             alpha = alpha, edgecolor = "lightgreen", label=dict_copy[elem.__class__]["label"])
+                             alpha = alpha, edgecolor = dict_copy[elem.__class__]["edgecolor"], label=dict_copy[elem.__class__]["label"])
             dict_copy[elem.__class__]["label"] = ""
 
         elif elem.__class__ == Undulator:
@@ -395,6 +395,11 @@ def new_plot_elems(fig, ax, lat, s_point=0, nturns=1, y_lim=None, y_scale=1, leg
 
         elif elem.__class__ == Multipole:
             ampl = sum(elem.kn)/m_max if u_max != 0 else 0.5
+            point, = ax.fill(s_coord, np.array([-1, 1, 1, -1, -1])*ampl*scale*y_scale, color,
+                             alpha = alpha, label=dict_copy[elem.__class__]["label"])
+            dict_copy[elem.__class__]["label"] = ""
+            
+        elif elem.__class__ == Monitor:
             point, = ax.fill(s_coord, np.array([-1, 1, 1, -1, -1])*ampl*scale*y_scale, color,
                              alpha = alpha, label=dict_copy[elem.__class__]["label"])
             dict_copy[elem.__class__]["label"] = ""
